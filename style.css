@@ -72,11 +72,11 @@
 }
 
 .download-app-badge {
-  height: 45px;
+  width: 175px;
 }
 
 .download-app-badge:first-child {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .site-content {
@@ -110,7 +110,7 @@
 }
 
 .feature-box-title {
-  margin-bottom: -8px;
+  margin-bottom: -6px;
   font-size: 22px;
   font-weight: 700;
 }
@@ -122,17 +122,59 @@
 
 @media (min-width: 768px) {
   .app-screenshot {
-    width: 500px;
-    margin-top: -24px;
+    width: 500px;    
+  }
+
+  .site-content {
+    top: -175px
   }
 
   .features {
     display: grid;
-    grid-template-columns: 200px 200px;
+    grid-template-columns: 180px 180px;
+    grid-template-rows: 200px 200px;
     column-gap: 72px;
     justify-content: center;
     align-items: baseline;
+    padding-inline-start: 48px
+  }
 
+  .download-app-section {
+    flex-direction: row-reverse;
+    gap: 16px
+  }
+
+
+  .download-app-badge:first-child {
+    margin-bottom: unset;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-header {
+    height: unset;
+    padding-bottom: 32px;
+    margin-bottom: 32px;
+  }
+
+  .site-content {
+    top: unset;
+  }
+
+  .app-description {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .app-screenshot {
+    width: 380px;
+    margin-inline-end: 48px;
+  }
+
+  .features {
+    grid-template-columns: 150px 180px;
     padding: unset;
     padding-inline-start: 16px;
 }
