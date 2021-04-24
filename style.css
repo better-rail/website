@@ -12,6 +12,17 @@
   src: url("/assets/fonts/Heebo.woff2") format("woff2");
 }
 
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+a {
+  color: DodgerBlue;
+  text-decoration: none;
+}
+
 .site-wrapper {
   margin: 0;
   background: white;
@@ -23,25 +34,25 @@
 }
 
 .page-header {
-  height: 385px;
+  height: 445px;
   padding-top: 65px;
   background-color: #f1f1f6;
   text-align: center;
 }
 
 .app-icon {
-  width: 60px;
-  height: 60px;
+  width: 95px;
+  height: 95px;
   margin: 0 auto 10px;
   box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.15);
   background-color: #fff;
   border-radius: 20px;
-  padding: 20px;
+  padding: 19px;
   text-align: center;
 }
 
 .app-icon-image {
-  height: 62.5px;
+  height: 60px;
 }
 
 .app-name {
@@ -194,8 +205,6 @@ footer {
 }
 
 .footer-links-item {
-  color: DodgerBlue;
-  text-decoration: none;
   font-size: 17px;
   opacity: 0.8;
   transition: opacity 0.25s;
@@ -239,8 +248,9 @@ footer {
 .site-page .page-header {
   height: 80px;
   padding-top: 35px;
+  margin-bottom: 30px;
 }
-
+/* 
 .site-page .app-icon {
   width: 40px;
   height: 40px;
@@ -250,7 +260,7 @@ footer {
 
 .site-page .app-icon-image {
   height: 39px;
-}
+} */
 
 .site-page .site-content {
   position: static;
@@ -259,9 +269,25 @@ footer {
 
 .site-page .site-content {
   text-align: unset;
-  padding: 12px;
+  padding: 24px 12px;
+  margin-bottom: 12px;
 }
 
-.site-page-title {
+.site-page-content-title {
   margin: 0;
+}
+
+.site-page-content-subtitle {
+  margin: 0;
+}
+
+.site-page-content-text {
+  margin: 0;
+  margin-bottom: 8px;
+  line-height: 1.6;
+  letter-spacing: -0.3px;
+}
+
+hr {
+  border-style: dashed;
 }
