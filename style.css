@@ -275,6 +275,7 @@ footer {
 
 .site-page-content-title {
   margin: 0;
+  margin-bottom: 4px;
 }
 
 .site-page-content-subtitle {
@@ -290,4 +291,53 @@ footer {
 
 hr {
   border-style: dashed;
+  opacity: 0.25;
+}
+
+.site-page-content-last-updated {
+  margin-top: 22px;
+  margin-bottom: 0;
+  font-size: 15px;
+  letter-spacing: -0.1px;
+  opacity: 0.75;
+}
+
+@media (min-width: 620px) {
+  .site-page .site-content {
+    max-width: 620px;
+    margin: 0 auto;
+  }
+
+  .site-page-content-title {
+    margin: 6px 0 8px;
+    font-size: 27px;
+    text-align: center;
+  }
+
+  .site-page-content-subtitle {
+    font-size: 23.5px;
+  }
+
+  .site-page-content-text {
+    font-size: 18px;
+  }
+
+  hr {
+    max-width: 700px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .site-page-content-title {
+    font-size: 32px;
+  }
+
+  .site-page-content-subtitle {
+    font-size: 26px;
+    letter-spacing: 0;
+  }
+
+  .site-page-content-text {
+    font-size: 20px;
+  }
 }
