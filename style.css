@@ -274,8 +274,7 @@ footer {
 }
 
 .site-page-content-title {
-  margin: 0;
-  margin-bottom: 4px;
+  margin: 6px 0 4px;
 }
 
 .site-page-content-subtitle {
@@ -313,7 +312,7 @@ footer {
   }
 
   .site-page-content-title {
-    margin: 6px 0 8px;
+    margin-bottom: 8px;
     font-size: 27px;
     text-align: center;
   }
