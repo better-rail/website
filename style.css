@@ -269,7 +269,7 @@ footer {
 
 .site-page .site-content {
   text-align: unset;
-  padding: 24px 12px;
+  padding: 24px 18px 12px 32px;
   margin-bottom: 12px;
 }
 
@@ -300,6 +300,10 @@ hr {
   font-size: 15px;
   letter-spacing: -0.1px;
   opacity: 0.75;
+}
+
+footer {
+  margin-bottom: 12px;
 }
 
 @media (min-width: 620px) {
