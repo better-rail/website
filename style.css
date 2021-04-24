@@ -36,7 +36,7 @@
   box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.15);
   background-color: #fff;
   border-radius: 20px;
-  padding: 20px 20px 20px;
+  padding: 20px;
   text-align: center;
 }
 
@@ -234,3 +234,34 @@ footer {
   opacity: 1;
 }
 /* #endregion */
+
+/** PAGE STYLES **/
+.site-page .page-header {
+  height: 80px;
+  padding-top: 35px;
+}
+
+.site-page .app-icon {
+  width: 40px;
+  height: 40px;
+  padding: 12px;
+  border-radius: 10px;
+}
+
+.site-page .app-icon-image {
+  height: 39px;
+}
+
+.site-page .site-content {
+  position: static;
+  margin: unset;
+}
+
+.site-page .site-content {
+  text-align: unset;
+  padding: 12px;
+}
+
+.site-page-title {
+  margin: 0;
+}
