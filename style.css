@@ -274,7 +274,7 @@ footer {
 }
 
 .site-page-content-title {
-  margin: 6px 0 4px;
+  margin: 8px 0 4px;
 }
 
 .site-page-content-subtitle {
@@ -289,6 +289,7 @@ footer {
 }
 
 hr {
+  margin-bottom: 12px;
   border-style: dashed;
   opacity: 0.25;
 }
@@ -302,7 +303,7 @@ hr {
 }
 
 footer {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 @media (min-width: 620px) {
@@ -321,26 +322,12 @@ footer {
     font-size: 23.5px;
   }
 
-  .site-page-content-text {
+  .site-page-content-text,
+  li {
     font-size: 18px;
   }
 
   hr {
     max-width: 700px;
-  }
-}
-
-@media (min-width: 1280px) {
-  .site-page-content-title {
-    font-size: 32px;
-  }
-
-  .site-page-content-subtitle {
-    font-size: 26px;
-    letter-spacing: 0;
-  }
-
-  .site-page-content-text {
-    font-size: 20px;
   }
 }
