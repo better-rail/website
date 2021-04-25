@@ -303,7 +303,7 @@ hr {
 }
 
 footer {
-  margin-bottom: 16px;
+  margin-bottom: max(16px, env(safe-area-inset-bottom));
 }
 
 @media (min-width: 620px) {
