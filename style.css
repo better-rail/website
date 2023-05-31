@@ -73,6 +73,7 @@ a {
 
 .feature-box {
   margin-bottom: 32px;
+  text-align: center;
 }
 
 .feature-box-icon {
@@ -193,6 +194,9 @@ footer {
     grid-template-columns: 150px 180px;
     padding: unset;
     padding-inline-start: 16px;
+  }
+  .feature-box {
+    text-align: start;
   }
 }
 
