@@ -283,8 +283,9 @@
 
     <footer>
       <a
-        href="https://patreon.com/BetterRail"
+        href="https://pages.greeninvoice.co.il/payments/links/696f6413-1068-4002-a0f7-6b9b6676ead5"
         target="_blank"
+        rel="noopener noreferrer"
         style="
           padding-block: 2px;
           padding-inline: 26px;
@@ -294,9 +295,9 @@
           border-radius: 24px;
           font-size: 20px;
         "
-        id="patreon-badge"
+        id="support-badge"
       >
-        תמכו בנו בפטראון
+        תמכו בנו
       </a>
       <div class="footer-social-links">
         <a href="https://github.com/better-rail/app" target="_blank" rel="noopener noreferrer"
@@ -322,8 +323,8 @@
       document.getElementById("play-store-badge").addEventListener("click", function () {
         posthog.capture("download_click", { platform: "android" });
       });
-      document.getElementById("patreon-badge").addEventListener("click", function () {
-        posthog.capture("patreon_click");
+      document.getElementById("support-badge").addEventListener("click", function () {
+        posthog.capture("support_click");
       });
     </script>
   </body>
