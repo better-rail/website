@@ -791,6 +791,59 @@
       color: var(--good-text);
     }
 
+    /* ---------- train consist ---------- */
+    .consist {
+      display: flex;
+      align-items: stretch;
+      gap: 3px;
+      direction: ltr;
+      margin: 4px 0 12px;
+    }
+
+    .car {
+      flex: 1 1 0;
+      min-width: 0;
+      height: 42px;
+      border: 1px solid var(--hairline);
+      background: var(--surface-1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      font-size: 13px;
+      line-height: 1;
+    }
+
+    .car:first-child {
+      border-top-left-radius: 11px;
+      border-bottom-left-radius: 11px;
+    }
+
+    .car:last-child {
+      border-top-right-radius: 11px;
+      border-bottom-right-radius: 11px;
+    }
+
+    .car.marked {
+      border-color: var(--good);
+      background: rgba(12, 163, 12, 0.08);
+    }
+
+    .car.blank {
+      border-style: dashed;
+      color: var(--ink-muted);
+      font-weight: 600;
+    }
+
+    .consist-meta {
+      font-size: 12.5px;
+      color: var(--ink-2);
+    }
+
+    .consist-meta.missing {
+      color: var(--critical);
+    }
+
     @media (max-width: 640px) {
 
       .stat-row,
@@ -1344,6 +1397,107 @@
         <strong>מה נדרש:</strong>
         ערוץ מוסדר להודעות, באחת משתי הדרכים: השארת ה־API הקיים של רכבת ישראל פתוח לשימוש,
         או פרסום ההודעות דרך מערכת "מורן" של משרד התחבורה.
+      </div>
+    </div>
+
+    <!-- ================= Train info ================= -->
+    <div class="section-title">חלק ד׳ · מידע על הרכבת</div>
+
+    <!-- 9. train composition -->
+    <div class="card">
+      <h2><span class="num">9</span>מידע על הרכבת עצמה — הרכב הקרונות, נגישות והעלאת אופניים</h2>
+      <p class="desc">
+        לנוסע בכיסא גלגלים או לנוסע עם אופניים השאלה המעשית אינה רק מתי יוצאת הרכבת, אלא
+        לאיזה קרון לעלות. רכבת ישראל יודעת לכל רכבת מה הרכבה — סוג הרכבת שמגיעה, מספר הקרונות,
+        מספר מקומות הישיבה, ולכל קרון בנפרד אם הוא נגיש לכיסא גלגלים ואם מותר להעלות בו אופניים.
+        אף אחד מהנתונים האלה אינו מונגש בנתוני משרד התחבורה — לא ב־GTFS ולא ב־SIRI.
+      </p>
+      <div class="compare">
+        <div class="panel">
+          <div class="panel-head"><span class="chip rail">נתוני רכבת ישראל</span></div>
+          <div class="consist">
+            <div class="car marked">♿ 🚲</div>
+            <div class="car"></div>
+            <div class="car"></div>
+            <div class="car"></div>
+            <div class="car"></div>
+            <div class="car"></div>
+          </div>
+          <div class="consist-meta">
+            הרכב מלא לכל רכבת: מספר הקרונות, סוג הרכבת, מספר המקומות,
+            ומיקומם של הקרון הנגיש והקרון שמותר להעלות בו אופניים.
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><span class="chip gtfs">GTFS · משרד התחבורה</span></div>
+          <div class="consist">
+            <div class="car blank">?</div>
+            <div class="car blank">?</div>
+            <div class="car blank">?</div>
+            <div class="car blank">?</div>
+            <div class="car blank">?</div>
+            <div class="car blank">?</div>
+          </div>
+          <div class="consist-meta missing">
+            אין בפיד שום נתון על הרכבת שמגיעה — לא סוג, לא מספר קרונות, ולא סימון נגישות או אופניים.
+          </div>
+        </div>
+      </div>
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>הנתון</th>
+            <th>נתוני רכבת ישראל</th>
+            <th>GTFS · משרד התחבורה</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>סוג הרכבת שמגיעה</td>
+            <td><span class="status ok"><span class="ico">✓</span>קיים</span></td>
+            <td><span class="status no"><span class="ico">✕</span>אין שדה</span></td>
+          </tr>
+          <tr>
+            <td>מספר הקרונות ברכבת</td>
+            <td><span class="status ok"><span class="ico">✓</span>קיים</span></td>
+            <td><span class="status no"><span class="ico">✕</span>אין שדה</span></td>
+          </tr>
+          <tr>
+            <td>מספר מקומות הישיבה</td>
+            <td><span class="status ok"><span class="ico">✓</span>קיים</span></td>
+            <td><span class="status no"><span class="ico">✕</span>אין שדה</span></td>
+          </tr>
+          <tr>
+            <td>קרון נגיש לכיסא גלגלים</td>
+            <td><span class="status ok"><span class="ico">✓</span>ברמת הקרון</span></td>
+            <td><span class="status no"><span class="ico">✕</span>השדה קיים בפיד — וריק</span></td>
+          </tr>
+          <tr>
+            <td>קרון שמותר להעלות בו אופניים</td>
+            <td><span class="status ok"><span class="ico">✓</span>ברמת הקרון</span></td>
+            <td><span class="status no"><span class="ico">✕</span>השדה אינו קיים בפיד</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="footnote">
+        נבדק בפיד מ־30.8.2026: בקובץ <code>trips.txt</code> קיימת העמודה
+        <code>wheelchair_accessible</code>, אך היא ריקה בכל 1,118 נסיעות רכבת ישראל שבפיד
+        (1,058 קווי רכבת, <code>agency_id=2</code>). העמודה <code>bikes_allowed</code> אינה קיימת
+        בפיד כלל, ואין בו קובץ או שדה שמתאר את הרכב הרכבת. מנגד, ה־API של רכבת ישראל מחזיר לכל
+        רכבת אובייקט הרכבה — מספר הקרונות, מספר המקומות ומזהה סוג הרכבת — ולצידו רשומה לכל קרון
+        בנפרד עם מספרו בהרכב, סוגו, וסימון נגישות והעלאת אופניים. זה המידע שמוצג בפועל
+        במסך פרטי הנסיעה ב־Better Rail.
+      </p>
+      <div class="fix-callout">
+        <strong>היכן משלימים בפרוטוקול:</strong>
+        ברמת הנסיעה, GTFS מגדיר שני שדות ייעודיים ב־<code>trips.txt</code> —
+        <code>wheelchair_accessible</code> ו־<code>bikes_allowed</code>
+        (1 = נגיש / מותר, 2 = לא): הראשון כבר קיים בפיד וממתין לאכלוס, השני טרם נוסף כלל.
+        ברמת הקרון — איזה קרון נגיש, באיזה קרון מותר להעלות אופניים, וכן סוג הרכבת ומספר הקרונות —
+        אין ל־GTFS הבסיסי שדה מתאים; המידע הזה מיוצג בתקן NeTEx (הרכב רכבת —
+        <code>TrainElement</code> / <code>TrainComponent</code>), וב־SIRI ניתן לסמן מאפייני רכב
+        באמצעות <code>VehicleFeatureRef</code>. כל עוד לא נפרס ערוץ כזה, הדרך היחידה להנגיש את
+        המידע היא השארת ה־API של רכבת ישראל פתוח לשימוש (ראו סעיף 8).
       </div>
     </div>
 
