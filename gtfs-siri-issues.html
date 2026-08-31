@@ -791,59 +791,6 @@
       color: var(--good-text);
     }
 
-    /* ---------- train consist ---------- */
-    .consist {
-      display: flex;
-      align-items: stretch;
-      gap: 3px;
-      direction: ltr;
-      margin: 4px 0 12px;
-    }
-
-    .car {
-      flex: 1 1 0;
-      min-width: 0;
-      height: 42px;
-      border: 1px solid var(--hairline);
-      background: var(--surface-1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 2px;
-      font-size: 13px;
-      line-height: 1;
-    }
-
-    .car:first-child {
-      border-top-left-radius: 11px;
-      border-bottom-left-radius: 11px;
-    }
-
-    .car:last-child {
-      border-top-right-radius: 11px;
-      border-bottom-right-radius: 11px;
-    }
-
-    .car.marked {
-      border-color: var(--good);
-      background: rgba(12, 163, 12, 0.08);
-    }
-
-    .car.blank {
-      border-style: dashed;
-      color: var(--ink-muted);
-      font-weight: 600;
-    }
-
-    .consist-meta {
-      font-size: 12.5px;
-      color: var(--ink-2);
-    }
-
-    .consist-meta.missing {
-      color: var(--critical);
-    }
-
     @media (max-width: 640px) {
 
       .stat-row,
@@ -1411,36 +1358,6 @@
         ולכל קרון בנפרד אם הוא נגיש לכיסא גלגלים ואם מותר להעלות בו אופניים.
         אף אחד מהנתונים האלה אינו מונגש בנתוני משרד התחבורה.
       </p>
-      <div class="compare">
-        <div class="panel">
-          <div class="panel-head"><span class="chip rail">נתוני רכבת ישראל</span></div>
-          <div class="consist">
-            <div class="car marked">♿ 🚲</div>
-            <div class="car"></div>
-            <div class="car"></div>
-            <div class="car"></div>
-            <div class="car"></div>
-            <div class="car"></div>
-          </div>
-          <div class="consist-meta">
-            הרכב מלא לכל רכבת, כולל מיקום הקרון הנגיש והקרון לאופניים.
-          </div>
-        </div>
-        <div class="panel">
-          <div class="panel-head"><span class="chip gtfs">GTFS · משרד התחבורה</span></div>
-          <div class="consist">
-            <div class="car blank">?</div>
-            <div class="car blank">?</div>
-            <div class="car blank">?</div>
-            <div class="car blank">?</div>
-            <div class="car blank">?</div>
-            <div class="car blank">?</div>
-          </div>
-          <div class="consist-meta missing">
-            אין בפיד נתון כלשהו על הרכבת שמגיעה.
-          </div>
-        </div>
-      </div>
       <table class="matrix">
         <thead>
           <tr>
@@ -1468,7 +1385,7 @@
           <tr>
             <td>קרון נגיש לכיסא גלגלים</td>
             <td><span class="status ok"><span class="ico">✓</span>ברמת הקרון</span></td>
-            <td><span class="status no"><span class="ico">✕</span>השדה קיים בפיד — וריק</span></td>
+            <td><span class="status no"><span class="ico">✕</span>השדה קיים בפיד, וריק</span></td>
           </tr>
           <tr>
             <td>קרון שמותר להעלות בו אופניים</td>
@@ -1484,15 +1401,6 @@
         ה־API של רכבת ישראל מחזיר לכל רכבת מספר קרונות, מספר מקומות וסוג רכבת,
         ורשומה לכל קרון עם סימון נגישות ואופניים.
       </p>
-      <div class="fix-callout">
-        <strong>היכן משלימים בפרוטוקול:</strong>
-        ברמת הנסיעה GTFS מגדיר ב־<code>trips.txt</code> את <code>wheelchair_accessible</code>
-        ו־<code>bikes_allowed</code> (1 = נגיש / מותר, 2 = לא) — הראשון קיים בפיד וריק, השני אינו קיים.
-        ברמת הקרון אין ל־GTFS שדה מתאים: הרכב רכבת מיוצג בתקן NeTEx
-        (<code>TrainElement</code> / <code>TrainComponent</code>), וב־SIRI ניתן לסמן מאפייני רכב
-        ב־<code>VehicleFeatureRef</code>. עד שייפרס ערוץ כזה — השארת ה־API של רכבת ישראל
-        פתוח לשימוש (ראו סעיף 8).
-      </div>
     </div>
 
     <footer class="page-footer">Better Rail · אוגוסט 2026</footer>
