@@ -3,13 +3,33 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Better Rail - תודה רבה!</title>
-    <meta name="robots" content="noindex" />
+    <title>Better Rail - ריכוז ההופעות בתקשורת</title>
+    <meta name="description" content="ריכוז הכתבות, הראיונות והאזכורים של אפליקציית בטר רייל באמצעי התקשורת." />
+    <link rel="canonical" href="https://better-rail.co.il/media/" />
+
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/Heebo.woff2" crossorigin />
+    <link rel="preload" as="image" href="/assets/images/icon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/style.css?v=bb189fcb" />
+
+    <meta property="og:title" content="Better Rail - ריכוז ההופעות בתקשורת" />
+    <meta property="og:description" content="ריכוז הכתבות, הראיונות והאזכורים של אפליקציית בטר רייל באמצעי התקשורת." />
+    <meta property="og:image" content="https://better-rail.co.il/assets/images/og-image.png" />
+    <meta property="og:url" content="https://better-rail.co.il/media/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Better Rail" />
+    <meta property="og:locale" content="he_IL" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Better Rail - ריכוז ההופעות בתקשורת" />
+    <meta name="twitter:description" content="ריכוז הכתבות, הראיונות והאזכורים של אפליקציית בטר רייל באמצעי התקשורת." />
+    <meta name="twitter:image" content="https://better-rail.co.il/assets/images/og-image.png" />
+    <meta name="twitter:site" content="@better_rail" />
+
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png" />
     <link rel="icon" type="image/png" href="/assets/favicon/favicon-32x32.png" sizes="32x32" />
     <link rel="icon" type="image/png" href="/assets/favicon/favicon-16x16.png" sizes="16x16" />
     <meta name="theme-color" content="#0a81dd" />
+
     <style>
       @font-face {
         font-family: "Heebo";
@@ -36,10 +56,39 @@
         text-align: center;
       }
 
-      .thank-you-emoji {
-        font-size: 52px;
-        text-align: center;
-        margin: 10px 0 0;
+      .media-list {
+        list-style: none;
+        padding-inline-start: 40px;
+        margin: 16px 0 40px;
+        text-align: start;
+      }
+
+      .media-list li {
+        position: relative;
+        padding-inline-start: 28px;
+        margin-bottom: 14px;
+        font-size: 18px;
+        line-height: 1.6;
+        text-align: start;
+      }
+
+      .media-list-icon {
+        position: absolute;
+        inset-inline-start: 0;
+        top: 5px;
+        width: 18px;
+        height: 18px;
+        object-fit: contain;
+        border-radius: 3px;
+      }
+
+      .media-list-link {
+        color: DodgerBlue;
+        text-decoration: none;
+      }
+
+      .media-list-link:hover {
+        text-decoration: underline;
       }
     </style>
     <script>
@@ -98,24 +147,59 @@
     </header>
 
     <main class="site-content">
-      <p class="thank-you-emoji">💙</p>
-      <h2 class="site-page-content-title">תודה רבה!</h2>
+      <h2 class="site-page-content-title">הופעות בתקשורת</h2>
+      <p class="site-page-content-text">כתבות, ראיונות וסיקור של Better Rail באמצעי התקשורת:</p>
 
-      <p class="site-page-content-text">התמיכה שלכם התקבלה בהצלחה, ואנחנו מודים לכם מעומק הלב.</p>
+      <ul class="media-list" id="media-list"></ul>
 
-      <p class="site-page-content-text">התמיכה שלכם היא שמאפשרת לנו להמשיך לפתח ולתחזק את האפליקציה עבור כלל הנוסעים.</p>
+      <script src="/media/articles.js"></script>
+      <script>
+        (function renderMediaList() {
+          const list = document.getElementById("media-list");
+          const articles = window.MEDIA_ARTICLES;
+          if (!list || !Array.isArray(articles)) return;
 
-      <p class="site-page-content-text">אישור תשלום וחשבונית יישלחו אליכם למייל בדקות הקרובות.</p>
+          const esc = (s) =>
+            String(s ?? "")
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;");
 
-      <p class="site-page-content-text">שתהיה נסיעה טובה,<br />צוות בטר רייל</p>
+          const getTime = (item) => (item.datetime ? Date.parse(item.datetime) || 0 : 0);
+
+          list.innerHTML = articles
+            .slice()
+            .sort((a, b) => getTime(b) - getTime(a))
+            .map(
+              (item) =>
+                `<li>${
+                  item.image
+                    ? `<img src="${esc(item.image)}" alt="${esc(item.outlet)}" class="media-list-icon" loading="lazy" decoding="async" onerror="this.style.visibility='hidden'" />`
+                    : ""
+                }<a class="media-list-link" href="${esc(item.url)}" target="_blank" rel="noopener noreferrer">${esc(item.title)}</a></li>`,
+            )
+            .join("");
+        })();
+      </script>
     </main>
 
     <hr />
 
     <footer>
       <div class="footer-social-links">
+        <a href="https://github.com/better-rail/app" target="_blank" rel="noopener noreferrer"
+          ><img src="/assets/icons/github.svg" width="35" height="35" alt="Github" loading="lazy" decoding="async"
+        /></a>
         <a href="https://www.x.com/better_rail" target="_blank" rel="noopener noreferrer"
-          ><img src="/assets/icons/twitter.svg" width="35" alt="Twitter"
+          ><img
+            src="/assets/icons/twitter.svg"
+            width="35"
+            height="35"
+            alt="Twitter"
+            style="margin-right: 10px"
+            loading="lazy"
+            decoding="async"
         /></a>
       </div>
 
