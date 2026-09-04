@@ -40,7 +40,11 @@ function extractTitle(html) {
 }
 
 function extractBaseDomain(hostname = "") {
-  return hostname.toLowerCase().replace(/^www\./, "").split(".")[0];
+  const parts = hostname.toLowerCase().replace(/^www\./, "").split(".");
+  if (parts.length >= 3 && parts[parts.length - 1] === "il") {
+    return parts[parts.length - 3];
+  }
+  return parts.length >= 2 ? parts[parts.length - 2] : parts[0];
 }
 
 function cleanTitle(title, outlet) {
