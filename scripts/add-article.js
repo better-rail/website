@@ -9,211 +9,135 @@ const FETCH_TIMEOUT_MS = 15000;
 const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
 
-const HEBREW_MONTHS = [
-  "בינואר",
-  "בפברואר",
-  "במרץ",
-  "באפריל",
-  "במאי",
-  "ביוני",
-  "ביולי",
-  "באוגוסט",
-  "בספטמבר",
-  "באוקטובר",
-  "בנובמבר",
-  "בדצמבר",
-];
-
-function decodeHtmlEntities(text) {
-  if (!text) return "";
+function decodeHtmlEntities(text = "") {
   return text
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&#x27;/gi, "'")
+    .replace(/&(?:quot|#34);/g, '"')
+    .replace(/&(?:apos|#39|#x27);/gi, "'")
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&nbsp;/g, " ")
-    .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(dec))
-    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(n))
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCharCode(parseInt(h, 16)))
     .trim();
 }
 
-function escapeRegExp(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function formatHebrewDate(date) {
-  const d = date.getDate();
-  const m = HEBREW_MONTHS[date.getMonth()];
-  const y = date.getFullYear();
-  return `${d} ${m} ${y}`;
-}
-
-function extractMeta(html, property) {
-  const patterns = [
-    new RegExp(`<meta[^>]+property=["']og:${property}["'][^>]+content=["']([^"']+)["']`, "i"),
-    new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:${property}["']`, "i"),
-    new RegExp(`<meta[^>]+name=["']${property}["'][^>]+content=["']([^"']+)["']`, "i"),
-    new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+name=["']${property}["']`, "i"),
-  ];
-
-  for (const regex of patterns) {
-    const match = html.match(regex);
-    if (match?.[1]) {
-      return decodeHtmlEntities(match[1]);
-    }
+function extractMeta(html, ...keys) {
+  for (const key of keys) {
+    const m =
+      html.match(new RegExp(`<meta[^>]+(?:property|name)=["'](?:og:)?${key}["'][^>]+content=["']([^"']+)["']`, "i")) ||
+      html.match(new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:)?${key}["']`, "i"));
+    if (m?.[1]) return decodeHtmlEntities(m[1]);
   }
-  return null;
+  return "";
 }
 
 function extractTitle(html) {
-  const ogTitle = extractMeta(html, "title");
-  if (ogTitle) return ogTitle;
+  const og = extractMeta(html, "title");
+  if (og) return og;
+  const m = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+  return m ? decodeHtmlEntities(m[1]) : "";
+}
 
-  const match = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-  return match ? decodeHtmlEntities(match[1]) : "";
+function extractBaseDomain(hostname = "") {
+  return hostname.toLowerCase().replace(/^www\./, "").split(".")[0];
 }
 
 function cleanTitle(title, outlet) {
   if (!title) return "";
   let cleaned = decodeHtmlEntities(title);
-
   if (outlet) {
-    const regex = new RegExp(`\\s*[\\|\\-–—•]\\s*${escapeRegExp(outlet)}$`, "i");
-    cleaned = cleaned.replace(regex, "").trim();
+    const escaped = outlet.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    cleaned = cleaned.replace(new RegExp(`\\s*[|\\-–—•]\\s*${escaped}(?:\\.[a-z0-9.-]+)?$`, "i"), "").trim();
   }
-
   return cleaned;
 }
 
 function extractPublishedDate(url, html) {
-  const datePatterns = [
-    /<meta[^>]+(?:property|name)=["'](?:og:)?article:published_time["'][^>]+content=["']([^"']+)["']/i,
-    /<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:)?article:published_time["']/i,
-    /<meta[^>]+(?:property|name)=["'](?:publishdate|pubdate|datepublished|dc\.date|article:modified_time)["'][^>]+content=["']([^"']+)["']/i,
-    /<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:publishdate|pubdate|datepublished|dc\.date|article:modified_time)["']/i,
-    /"datePublished":\s*["']([^"']+)["']/i,
-    /<time[^>]+datetime=["']([^"']+)["']/i,
-  ];
+  const raw =
+    extractMeta(html, "article:published_time", "publishdate", "pubdate", "datepublished", "dc.date", "article:modified_time") ||
+    html.match(/"datePublished":\s*["']([^"']+)["']/i)?.[1] ||
+    html.match(/<time[^>]+datetime=["']([^"']+)["']/i)?.[1];
 
-  for (const regex of datePatterns) {
-    const match = html.match(regex);
-    if (match?.[1]) {
-      const parsed = new Date(match[1]);
-      if (!isNaN(parsed.getTime())) {
-        return parsed;
-      }
-    }
+  if (raw) {
+    const d = new Date(raw);
+    if (!isNaN(d.getTime())) return d;
   }
 
   const urlMatch = url.match(/\/(\d{4})[-/](\d{1,2})[-/](\d{1,2})\b/);
   if (urlMatch) {
-    const year = parseInt(urlMatch[1], 10);
-    const month = parseInt(urlMatch[2], 10) - 1;
-    const day = parseInt(urlMatch[3], 10);
-    const parsed = new Date(year, month, day);
-    if (!isNaN(parsed.getTime())) {
-      return parsed;
-    }
+    const d = new Date(urlMatch[1], urlMatch[2] - 1, urlMatch[3]);
+    if (!isNaN(d.getTime())) return d;
   }
 
   return new Date();
 }
 
+function findLinkHref(html, relPattern) {
+  const m =
+    html.match(new RegExp(`<link[^>]+rel=["']${relPattern}["'][^>]+href=["']([^"']+)["']`, "i")) ||
+    html.match(new RegExp(`<link[^>]+href=["']([^"']+)["'][^>]+rel=["']${relPattern}["']`, "i"));
+  return m?.[1] || "";
+}
+
+function resolveUrl(href, base) {
+  try {
+    return href ? new URL(href, base).toString() : "";
+  } catch {
+    return "";
+  }
+}
+
 function extractWebsiteLogo(parsedUrl, html) {
-  // 1. Apple touch icon / high-resolution touch icon (standardized for both light & dark)
-  const appleTouchMatch = html.match(/<link[^>]+rel=["']apple-touch-icon(?:-precomposed)?["'][^>]+href=["']([^"']+)["']/i);
-  if (appleTouchMatch?.[1]) {
-    try {
-      return new URL(appleTouchMatch[1], parsedUrl.origin).toString();
-    } catch {}
+  const origin = parsedUrl.origin;
+
+  // 1. Touch icon or standard favicon
+  const iconHref =
+    findLinkHref(html, "apple-touch-icon(?:-precomposed)?") ||
+    findLinkHref(html, "(?:shortcut )?icon");
+  const icon = resolveUrl(iconHref, origin);
+  if (icon) return icon;
+
+  // 2. High-res icon with explicit sizes
+  const largeIconHref =
+    html.match(/<link[^>]+rel=["']icon["'][^>]+sizes=["']\d+x\d+["'][^>]+href=["']([^"']+)["']/i)?.[1] ||
+    html.match(/<link[^>]+href=["']([^"']+)["'][^>]+sizes=["']\d+x\d+["']/i)?.[1];
+  const largeIcon = resolveUrl(largeIconHref, origin);
+  if (largeIcon) return largeIcon;
+
+  // 3. Structured data / OpenGraph logo (ignore white/dark-mode assets)
+  const jsonLd = html.match(/"logo":\s*(?:\{\s*"@type":\s*"ImageObject",\s*"url":\s*"([^"]+)"|"([^"]+)")/i);
+  const logoCandidate = jsonLd?.[1] || jsonLd?.[2] || extractMeta(html, "logo");
+  if (logoCandidate && !/(?:white|negative|dark[-_]mode)/i.test(logoCandidate)) {
+    const logo = resolveUrl(logoCandidate.replace(/\\/g, ""), origin);
+    if (logo) return logo;
   }
 
-  // 2. High-res icon (192x192, 180x180, etc.)
-  const largeIconMatch =
-    html.match(
-      /<link[^>]+rel=["']icon["'][^>]+sizes=["'](?:192x192|180x180|144x144|128x128|96x96)["'][^>]+href=["']([^"']+)["']/i,
-    ) || html.match(/<link[^>]+href=["']([^"']+)["'][^>]+sizes=["'](?:192x192|180x180|144x144|128x128|96x96)["']/i);
-  if (largeIconMatch?.[1]) {
-    try {
-      return new URL(largeIconMatch[1], parsedUrl.origin).toString();
-    } catch {}
-  }
-
-  // 3. JSON-LD publisher logo
-  const jsonLdMatch =
-    html.match(/"publisher"[^}]*"logo"[^}]*"url":\s*"([^"]+)"/i) ||
-    html.match(/"logo":\s*\{\s*"@type":\s*"ImageObject",\s*"url":\s*"([^"]+)"/i) ||
-    html.match(/"publisher"[^}]*"logo":\s*"([^"]+)"/i);
-  if (jsonLdMatch?.[1]) {
-    try {
-      return new URL(jsonLdMatch[1].replace(/\\/g, ""), parsedUrl.origin).toString();
-    } catch {}
-  }
-
-  // 4. In-page logo img tag (header/nav logo)
-  const headerSection = html.match(/<header[\s\S]*?<\/header>/i)?.[0] || html.slice(0, 25000);
-  const logoImgMatch =
-    headerSection.match(/<img[^>]+src=["']([^"']*logo[^"']*\.(?:svg|png|webp|avif)(?:\?[^"']*)?)["']/i) ||
-    html.match(/<img[^>]+src=["']([^"']*logo[^"']*\.(?:svg|png|webp|avif)(?:\?[^"']*)?)["']/i);
-  if (logoImgMatch?.[1]) {
-    try {
-      const cleanLogo = logoImgMatch[1].replace(/-sm(\.[a-z]+)/i, "$1");
-      return new URL(cleanLogo, parsedUrl.origin).toString();
-    } catch {}
-  }
-
-  // 4. OpenGraph logo tag
-  const ogLogoMatch = html.match(/<meta[^>]+property=["'](?:og:logo|logo)["'][^>]+content=["']([^"']+)["']/i);
-  if (ogLogoMatch?.[1]) {
-    try {
-      return new URL(ogLogoMatch[1], parsedUrl.origin).toString();
-    } catch {}
-  }
-
-  // 5. Universal Google high-res 256px favicon fallback
+  // 4. Google favicon service fallback
   return `https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${parsedUrl.hostname}&size=256`;
 }
 
-async function fetchPageHtml(targetUrl) {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+async function fetchPageHtml(url) {
+  const res = await fetch(url, {
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    headers: {
+      "User-Agent": USER_AGENT,
+      Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language": "he,en-US,en;q=0.9",
+    },
+  });
 
-  try {
-    const res = await fetch(targetUrl, {
-      signal: controller.signal,
-      headers: {
-        "User-Agent": USER_AGENT,
-        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "he,en-US,en;q=0.9",
-      },
-    });
-
-    if (!res.ok) {
-      throw new Error(`HTTP status ${res.status} (${res.statusText})`);
-    }
-
-    return await res.text();
-  } finally {
-    clearTimeout(timeoutId);
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status} (${res.statusText})`);
   }
+
+  return res.text();
 }
 
 function loadArticles(filePath) {
-  if (!fs.existsSync(filePath)) {
-    throw new Error(`File not found: ${filePath}`);
-  }
-
   const code = fs.readFileSync(filePath, "utf8");
   const context = { window: {} };
-  vm.createContext(context);
-
-  try {
-    vm.runInContext(code, context);
-  } catch (err) {
-    throw new Error(`Failed to parse ${filePath}: ${err.message}`);
-  }
+  vm.runInNewContext(code, context);
 
   if (!Array.isArray(context.window?.MEDIA_ARTICLES)) {
     throw new Error(`window.MEDIA_ARTICLES is not an array in ${filePath}`);
@@ -223,12 +147,21 @@ function loadArticles(filePath) {
 }
 
 function saveArticles(filePath, articles) {
-  const serialized = JSON.stringify(articles, null, 2);
-  const content = `window.MEDIA_ARTICLES = ${serialized};\n`;
-  fs.writeFileSync(filePath, content, "utf8");
+  fs.writeFileSync(filePath, `window.MEDIA_ARTICLES = ${JSON.stringify(articles, null, 2)};\n`, "utf8");
 }
 
-async function addArticle(inputUrl, outlet) {
+async function main() {
+  const [, , inputUrl, arg3, arg4] = process.argv;
+
+  if (!inputUrl) {
+    console.error("Error: Please provide an article URL.\n\nUsage:\n  node scripts/add-article.js <url> [site_name/outlet] [image_url]");
+    process.exit(1);
+  }
+
+  const isArg3Url = arg3 && /^https?:\/\//i.test(arg3);
+  const manualOutlet = isArg3Url ? undefined : arg3?.trim();
+  const manualImage = isArg3Url ? arg3 : arg4;
+
   let parsedUrl;
   try {
     parsedUrl = new URL(inputUrl);
@@ -236,43 +169,29 @@ async function addArticle(inputUrl, outlet) {
       throw new Error("Protocol must be http: or https:");
     }
   } catch (err) {
-    console.error(`Error: Invalid URL: ${err.message}`);
-    process.exit(1);
+    throw new Error(`Invalid URL: ${err.message}`);
   }
 
+  const outlet = manualOutlet || extractBaseDomain(parsedUrl.hostname);
   const normalizedUrl = parsedUrl.toString();
+
   console.log(`Fetching data from: ${normalizedUrl}...`);
+  const html = await fetchPageHtml(normalizedUrl);
 
-  let html;
-  try {
-    html = await fetchPageHtml(normalizedUrl);
-  } catch (err) {
-    console.error(`Error fetching URL: ${err.message}`);
-    process.exit(1);
-  }
-
-  const rawTitle = extractTitle(html);
-  const title = cleanTitle(rawTitle, outlet);
-  const excerpt = extractMeta(html, "description") || "";
+  const title = cleanTitle(extractTitle(html), outlet);
+  const excerpt = extractMeta(html, "description");
   const image = manualImage || extractWebsiteLogo(parsedUrl, html);
   const dateObj = extractPublishedDate(normalizedUrl, html);
-  const formattedDate = formatHebrewDate(dateObj);
+  const date = dateObj.toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" });
 
-  console.log("\nArticle details found:");
+  console.log(`\nArticle details found:`);
   console.log(`  Title: ${title}`);
   console.log(`  Outlet: ${outlet}`);
-  console.log(`  Date: ${formattedDate}`);
+  console.log(`  Date: ${date}`);
   console.log(`  Excerpt: ${excerpt.slice(0, 90)}${excerpt.length > 90 ? "..." : ""}`);
   console.log(`  Image: ${image || "None"}`);
 
-  let articles;
-  try {
-    articles = loadArticles(ARTICLES_FILE);
-  } catch (err) {
-    console.error(`Error: ${err.message}`);
-    process.exit(1);
-  }
-
+  const articles = loadArticles(ARTICLES_FILE);
   if (articles.some((a) => a.url === normalizedUrl || a.url === inputUrl)) {
     console.log("\nWarning: Article already exists in media/articles.js.");
     return;
@@ -281,37 +200,19 @@ async function addArticle(inputUrl, outlet) {
   articles.push({
     title,
     outlet,
-    date: formattedDate,
+    date,
     datetime: dateObj.toISOString(),
     url: normalizedUrl,
     image,
     excerpt,
   });
 
-  articles.sort((a, b) => {
-    const timeA = new Date(a.datetime || a.date || 0).getTime();
-    const timeB = new Date(b.datetime || b.date || 0).getTime();
-    return timeB - timeA;
-  });
-
-  try {
-    saveArticles(ARTICLES_FILE, articles);
-    console.log("\nArticle successfully added to media/articles.js (sorted by date).");
-  } catch (err) {
-    console.error(`Error saving articles: ${err.message}`);
-    process.exit(1);
-  }
+  articles.sort((a, b) => new Date(b.datetime || b.date || 0) - new Date(a.datetime || a.date || 0));
+  saveArticles(ARTICLES_FILE, articles);
+  console.log("\nArticle successfully added to media/articles.js (sorted by date).");
 }
 
-const inputUrl = process.argv[2];
-const outlet = process.argv[3];
-const manualImage = process.argv[4];
-
-if (!inputUrl || !outlet) {
-  console.error("Error: Please provide both an article URL and an outlet name.");
-  console.log("Usage example:");
-  console.log('  node scripts/add-article.js "https://example.com/article" "שם המקור" [תמונה]');
+main().catch((err) => {
+  console.error(`Error: ${err.message}`);
   process.exit(1);
-}
-
-addArticle(inputUrl, outlet.trim());
+});

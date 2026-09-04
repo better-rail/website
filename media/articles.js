@@ -18,6 +18,24 @@ window.MEDIA_ARTICLES = [
     "excerpt": "Israel sells the world on trusting its engineers with their most sensitive systems. Its own railway can't tell when a train has left."
   },
   {
+    "title": "\"Ракевет Исраэль\" судится с авторами приложения Better Rail за авторское право",
+    "outlet": "newsru",
+    "date": "2 בספטמבר 2026",
+    "datetime": "2026-09-02T05:15:14.000Z",
+    "url": "https://www.newsru.co.il/finance/2sep2026/rakevet304.html",
+    "image": "https://static2.newsru.co.il/favicon.ico?cb=e8f609d2b2921cdf",
+    "excerpt": "Экономика: Better Rail работает примерно с 2021 года как независимое некоммерческое приложение для планирования поездок по железной дороге."
+  },
+  {
+    "title": "Israel Railways Legal Threat Against Better Rail App",
+    "outlet": "jfeed",
+    "date": "1 בספטמבר 2026",
+    "datetime": "2026-09-01T14:29:00.000Z",
+    "url": "https://www.jfeed.com/tech/israel-railways-better-rail-app-legal-dispute",
+    "image": "https://www.jfeed.com/logo/jfeed-logo_72x72.png",
+    "excerpt": "Israel Railways demands removal of Better Rail app, citing unauthorized data access and system damage. Developer given 7-day ultimatum amid legal threats."
+  },
+  {
     "title": "רכבת ישראל מאיימת בתביעה על אפליקציה בקוד פתוח שניסתה לעזור לנוסעים | גיקטיים",
     "outlet": "geektime",
     "date": "1 בספטמבר 2026",
