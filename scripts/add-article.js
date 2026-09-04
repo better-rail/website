@@ -54,7 +54,9 @@ function cleanTitle(title, outlet) {
     const escaped = outlet.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     cleaned = cleaned.replace(new RegExp(`\\s*[|\\-–—•]\\s*${escaped}(?:\\.[a-z0-9.-]+)?$`, "i"), "").trim();
   }
-  return cleaned;
+  return cleaned
+    .replace(/\s*[|\-–—•]\s*(?:גיקטיים|כלכליסט|כיפה|בבלי|היום|ישראל היום|וואלה(?: רכב)?|רכב ותחבורה|חדשות|גלובס|מאקו)\s*$/, "")
+    .trim();
 }
 
 function extractPublishedDate(url, html) {
@@ -176,11 +178,40 @@ async function downloadIcon(imageUrl, outlet) {
   return `/assets/media/${fileName}`;
 }
 
-function renderListItem({ outlet, url, title, icon }) {
+const OUTLET_NAMES = {
+  mako: "מאקו",
+  walla: "וואלה",
+  israelhayom: "ישראל היום",
+  calcalist: "כלכליסט",
+  themarker: "TheMarker",
+  globes: "גלובס",
+  inn: "ערוץ 7",
+  kikar: "כיכר השבת",
+  geektime: "גיקטיים",
+  kipa: "כיפה",
+  ice: "ICE",
+  babli: "בבלי",
+  ynet: "ynet",
+  haaretz: "הארץ",
+  maariv: "מעריב",
+  n12: "N12",
+};
+
+function renderListItem({ outlet, url, title, icon, date, dateObj }) {
+  const isoDate = dateObj.toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" });
   return [
     "        <li>",
-    `          <img src="${icon}" alt="${escapeHtml(outlet)}" class="media-list-icon" width="18" height="18" loading="lazy" decoding="async" />`,
-    `          <a class="media-list-link" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a>`,
+    `          <a class="media-card" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">`,
+    `            <img class="media-card-icon" src="${icon}" alt="" width="36" height="36" loading="lazy" decoding="async" />`,
+    '            <span class="media-card-body">',
+    `              <span class="media-card-title">${escapeHtml(title)}</span>`,
+    '              <span class="media-card-meta">',
+    `                <span class="media-card-outlet">${escapeHtml(OUTLET_NAMES[outlet] || outlet)}</span>`,
+    '                <span class="media-card-sep" aria-hidden="true">·</span>',
+    `                <time datetime="${isoDate}">${escapeHtml(date)}</time>`,
+    "              </span>",
+    "            </span>",
+    "          </a>",
     "        </li>",
   ].join("\n");
 }
@@ -239,7 +270,7 @@ async function main() {
   }
 
   const icon = await downloadIcon(image, outlet);
-  insertIntoMediaPage({ outlet, url: normalizedUrl, title, icon });
+  insertIntoMediaPage({ outlet, url: normalizedUrl, title, icon, date, dateObj });
   console.log(`\nArticle added to the top of media/index.html (icon: ${icon}).`);
 }
 
