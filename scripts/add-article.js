@@ -202,7 +202,7 @@ function renderListItem({ outlet, url, title, icon, date, dateObj }) {
   return [
     "        <li>",
     `          <a class="media-card" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">`,
-    `            <img class="media-card-icon" src="${icon}" alt="" width="36" height="36" loading="lazy" decoding="async" />`,
+    `            <img class="media-card-icon" src="${icon}" alt="" width="28" height="28" loading="lazy" decoding="async" />`,
     '            <span class="media-card-body">',
     `              <span class="media-card-title">${escapeHtml(title)}</span>`,
     '              <span class="media-card-meta">',
