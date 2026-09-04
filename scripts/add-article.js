@@ -2,9 +2,9 @@
 
 const fs = require("fs");
 const path = require("path");
-const vm = require("vm");
 
-const ARTICLES_FILE = path.join(__dirname, "..", "media", "articles.js");
+const MEDIA_PAGE = path.join(__dirname, "..", "media", "index.html");
+const ICONS_DIR = path.join(__dirname, "..", "assets", "media");
 const FETCH_TIMEOUT_MS = 15000;
 const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
@@ -138,20 +138,60 @@ async function fetchPageHtml(url) {
   return res.text();
 }
 
-function loadArticles(filePath) {
-  const code = fs.readFileSync(filePath, "utf8");
-  const context = { window: {} };
-  vm.runInNewContext(code, context);
-
-  if (!Array.isArray(context.window?.MEDIA_ARTICLES)) {
-    throw new Error(`window.MEDIA_ARTICLES is not an array in ${filePath}`);
-  }
-
-  return context.window.MEDIA_ARTICLES;
+function escapeHtml(s = "") {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-function saveArticles(filePath, articles) {
-  fs.writeFileSync(filePath, `window.MEDIA_ARTICLES = ${JSON.stringify(articles, null, 2)};\n`, "utf8");
+function extensionFor(contentType = "", url = "") {
+  const type = contentType.split(";")[0].trim().toLowerCase();
+  const byType = {
+    "image/png": "png",
+    "image/jpeg": "jpg",
+    "image/svg+xml": "svg",
+    "image/webp": "webp",
+    "image/gif": "gif",
+    "image/x-icon": "ico",
+    "image/vnd.microsoft.icon": "ico",
+  };
+  if (byType[type]) return byType[type];
+  const m = new URL(url).pathname.match(/\.(png|jpe?g|svg|webp|gif|ico)$/i);
+  return m ? m[1].toLowerCase().replace("jpeg", "jpg") : "png";
+}
+
+async function downloadIcon(imageUrl, outlet) {
+  const existing = fs.readdirSync(ICONS_DIR).find((f) => f.replace(/\.[^.]+$/, "") === outlet);
+  if (existing) return `/assets/media/${existing}`;
+
+  const res = await fetch(imageUrl, {
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    headers: { "User-Agent": USER_AGENT },
+  });
+  if (!res.ok) throw new Error(`Icon download failed: HTTP ${res.status}`);
+
+  const buf = Buffer.from(await res.arrayBuffer());
+  const magic = buf.subarray(0, 4).toString("hex");
+  const ext = magic === "89504e47" ? "png" : extensionFor(res.headers.get("content-type") || "", imageUrl);
+  const fileName = `${outlet}.${ext}`;
+  fs.writeFileSync(path.join(ICONS_DIR, fileName), buf);
+  return `/assets/media/${fileName}`;
+}
+
+function renderListItem({ outlet, url, title, icon }) {
+  return [
+    "        <li>",
+    `          <img src="${icon}" alt="${escapeHtml(outlet)}" class="media-list-icon" width="18" height="18" loading="lazy" decoding="async" />`,
+    `          <a class="media-list-link" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a>`,
+    "        </li>",
+  ].join("\n");
+}
+
+function insertIntoMediaPage(article) {
+  const html = fs.readFileSync(MEDIA_PAGE, "utf8");
+  const marker = '<ul class="media-list">';
+  const start = html.indexOf(marker);
+  if (start < 0) throw new Error(`Could not find ${marker} in ${MEDIA_PAGE}`);
+  const insertAt = start + marker.length;
+  fs.writeFileSync(MEDIA_PAGE, `${html.slice(0, insertAt)}\n${renderListItem(article)}${html.slice(insertAt)}`, "utf8");
 }
 
 async function main() {
@@ -183,7 +223,6 @@ async function main() {
   const html = await fetchPageHtml(normalizedUrl);
 
   const title = cleanTitle(extractTitle(html), outlet);
-  const excerpt = extractMeta(html, "description");
   const image = manualImage || extractWebsiteLogo(parsedUrl, html);
   const dateObj = extractPublishedDate(normalizedUrl, html);
   const date = dateObj.toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" });
@@ -192,28 +231,16 @@ async function main() {
   console.log(`  Title: ${title}`);
   console.log(`  Outlet: ${outlet}`);
   console.log(`  Date: ${date}`);
-  console.log(`  Excerpt: ${excerpt.slice(0, 90)}${excerpt.length > 90 ? "..." : ""}`);
   console.log(`  Image: ${image || "None"}`);
 
-  const articles = loadArticles(ARTICLES_FILE);
-  if (articles.some((a) => a.url === normalizedUrl || a.url === inputUrl)) {
-    console.log("\nWarning: Article already exists in media/articles.js.");
+  if (fs.readFileSync(MEDIA_PAGE, "utf8").includes(`href="${escapeHtml(normalizedUrl)}"`)) {
+    console.log("\nWarning: Article already exists in media/index.html.");
     return;
   }
 
-  articles.push({
-    title,
-    outlet,
-    date,
-    datetime: dateObj.toISOString(),
-    url: normalizedUrl,
-    image,
-    excerpt,
-  });
-
-  articles.sort((a, b) => new Date(b.datetime || b.date || 0) - new Date(a.datetime || a.date || 0));
-  saveArticles(ARTICLES_FILE, articles);
-  console.log("\nArticle successfully added to media/articles.js (sorted by date).");
+  const icon = await downloadIcon(image, outlet);
+  insertIntoMediaPage({ outlet, url: normalizedUrl, title, icon });
+  console.log(`\nArticle added to the top of media/index.html (icon: ${icon}).`);
 }
 
 main().catch((err) => {
