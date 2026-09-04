@@ -84,17 +84,8 @@
           0 1px 2px rgba(0, 0, 0, 0.03),
           0 6px 18px rgba(0, 0, 0, 0.05);
         transition:
-          transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
-          box-shadow 0.2s ease-out,
-          border-color 0.2s ease-out;
-      }
-
-      .media-card:hover {
-        transform: translateY(-2px);
-        border-color: rgba(10, 129, 221, 0.35);
-        box-shadow:
-          0 2px 4px rgba(0, 0, 0, 0.05),
-          0 12px 28px rgba(0, 0, 0, 0.1);
+          box-shadow 0.15s ease-out 0s,
+          border-color 0.15s ease-out 0s;
       }
 
       .media-card:focus-visible {
@@ -124,11 +115,7 @@
         line-height: 1.45;
         letter-spacing: -0.2px;
         color: #1c1c1e;
-        transition: color 0.08s ease-out;
-      }
-
-      .media-card:hover .media-card-title {
-        color: #0a81dd;
+        transition: color 0.08s ease-out 0s;
       }
 
       .media-card-meta {
@@ -144,13 +131,25 @@
         color: #3a3a3c;
       }
 
+      @media (hover: hover) {
+        .media-card:hover {
+          transition-delay: 70ms;
+          border-color: rgba(10, 129, 221, 0.35);
+          box-shadow:
+            0 2px 4px rgba(0, 0, 0, 0.05),
+            0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .media-card:hover .media-card-title {
+          transition-delay: 70ms;
+          color: #0a81dd;
+        }
+      }
+
       @media (prefers-reduced-motion: reduce) {
         .media-card,
         .media-card-title {
           transition: none;
-        }
-        .media-card:hover {
-          transform: none;
         }
       }
     </style>
