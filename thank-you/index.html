@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="he" dir="rtl">
   <head>
     <meta charset="UTF-8" />
@@ -61,14 +61,14 @@
             u.people = u.people || [];
             u.toString = function (t) {
               var e = "posthog";
-              return ("posthog" !== a && (e += "." + a), t || (e += " (stub)"), e);
+              return "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e;
             };
             u.people.toString = function () {
               return u.toString(1) + ".people (stub)";
             };
             n =
               "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags".split(
-                " ",
+                " "
               );
             for (p = 0; p < n.length; p++) g(u, n[p]);
             e._i.push([i, s, a]);
@@ -103,7 +103,9 @@
 
       <p class="site-page-content-text">התמיכה שלכם התקבלה בהצלחה, ואנחנו מודים לכם מעומק הלב.</p>
 
-      <p class="site-page-content-text">התמיכה שלכם היא שמאפשרת לנו להמשיך לפתח ולתחזק את האפליקציה עבור כלל הנוסעים.</p>
+      <p class="site-page-content-text">
+        התמיכה שלכם היא שמאפשרת לנו להמשיך לפתח ולתחזק את האפליקציה עבור כלל הנוסעים.
+      </p>
 
       <p class="site-page-content-text">אישור תשלום וחשבונית יישלחו אליכם למייל בדקות הקרובות.</p>
 
@@ -128,5 +130,6 @@
         <a class="footer-links-item underline-hovered-link" href="/contact">יצירת קשר</a>
       </div>
     </footer>
+
   </body>
 </html>
